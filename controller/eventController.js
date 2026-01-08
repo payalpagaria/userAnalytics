@@ -169,11 +169,13 @@ export const getClickHeatmapForPage = async (req, res) => {
       });
     }
 
+    const decodedUrl = decodeURIComponent(page_url);
+
     const heatmap = await Event.aggregate([
       {
         $match: {
           event_type: "click",
-          page_url
+          page_url: decodedUrl
         }
       },
       {
