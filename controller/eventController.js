@@ -207,6 +207,46 @@ export const getClickHeatmapForPage = async (req, res) => {
   }
 };
 
+export const getHeatmapPages = async (req, res) => {
+  try {
+    const pages = await Event.aggregate([
+      {
+        $match: {
+          event_type: "click"
+        }
+      },
+      {
+        $group: {
+          _id: "$page_url",
+          clickCount: { $sum: 1 },
+          lastActivity: { $max: "$timestamp" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          page_url: "$_id",
+          click_count: "$clickCount",
+          last_activity: "$lastActivity"
+        }
+      },
+      {
+        $sort: { click_count: -1 }
+      }
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: pages
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 export const getDashboardStats = async (req, res) => {
   try {
     const stats = await Event.aggregate([
